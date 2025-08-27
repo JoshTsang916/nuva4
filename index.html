@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雲寶救援任務 - JSON魔法</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 城市背景 */
+        .city-bg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+            z-index: 1;
+        }
+        
+        .building {
+            position: absolute;
+            bottom: 0;
+            background: linear-gradient(to top, #1a1a3e, #2d1b69);
+            border-top: 2px solid #00ffff;
+        }
+        
+        .building:nth-child(1) { left: 5%; width: 60px; height: 120px; }
+        .building:nth-child(2) { left: 15%; width: 80px; height: 100px; }
+        .building:nth-child(3) { left: 25%; width: 50px; height: 140px; }
+        .building:nth-child(4) { left: 35%; width: 70px; height: 90px; }
+        .building:nth-child(5) { left: 50%; width: 90px; height: 130px; }
+        .building:nth-child(6) { left: 65%; width: 60px; height: 110px; }
+        .building:nth-child(7) { left: 75%; width: 75px; height: 95px; }
+        .building:nth-child(8) { left: 85%; width: 55px; height: 125px; }
+        
+        /* 主要內容 */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title h1 {
+            font-size: 3rem;
+            color: #00ffff;
+            text-shadow: 0 0 20px #00ffff;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        .title p {
+            font-size: 1.2rem;
+            color: #87ceeb;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00ffff; }
+            to { text-shadow: 0 0 30px #00ffff, 0 0 40px #00ffff; }
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+        
+        /* 圖片區域 */
+        .image-section {
+            text-align: center;
+        }
+        
+        .image-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .creature-image {
+            width: 350px;
+            height: 350px;
+            object-fit: cover;
+            border-radius: 15px;
+            border: 3px solid #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            transition: opacity 1s ease-in-out;
+        }
+        
+        .creature-image.second {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+        }
+        
+        /* 任務區域 */
+        .mission-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .info-box, .challenge-box, .result-box {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        
+        .info-box h2, .challenge-box h3 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .code-display {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            color: #00ff00;
+            font-size: 16px;
+        }
+        
+        .json-input {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            background: #1a1a1a;
+            border: 2px solid #00ffff;
+            border-radius: 5px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            resize: none;
+            margin-bottom: 15px;
+        }
+        
+        .json-input::placeholder {
+            color: #666;
+        }
+        
+        .magic-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .magic-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 0, 255, 0.5);
+        }
+        
+        .result-box {
+            display: none;
+        }
+        
+        .result-box.show {
+            display: block;
+        }
+        
+        .success {
+            color: #00ff00;
+            font-size: 18px;
+        }
+        
+        .error {
+            color: #ff4444;
+            font-size: 18px;
+        }
+        
+        .hint {
+            color: #ffaa00;
+            margin-top: 15px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 城市背景 -->
+    <div class="city-bg">
+        <div class="building"></div>
+        <div class="building"></div>
+        <div class="building"></div>
+        <div class="building"></div>
+        <div class="building"></div>
+        <div class="building"></div>
+        <div class="building"></div>
+        <div class="building"></div>
+    </div>
+    
+    <div class="container">
+        <!-- 標題 -->
+        <div class="title">
+            <h1>雲寶救援任務</h1>
+            <p>資料魔法 JSON 挑戰</p>
+        </div>
+        
+        <!-- 主要內容 -->
+        <div class="main-content">
+            <!-- 圖片區域 -->
+            <div class="image-section">
+                <div class="image-container">
+                    <img id="creatureImage1" class="creature-image" 
+                         src="data:image/svg+xml,%3Csvg xmlns='https://lh3.googleusercontent.com/d/18LiZeLwBVmhUjaPDDXcjB-sX6YTBEgKS' width='350' height='350'%3E%3Crect width='350' height='350' fill='%23333'/%3E%3Ctext x='175' y='175' text-anchor='middle' fill='%2300ffff' font-size='20'%3E雲寶 - 虛弱狀態%3C/text%3E%3C/svg%3E" 
+                         alt="雲寶 - 虛弱狀態">
+                    <img id="creatureImage2" class="creature-image second" 
+                         src="data:image/svg+xml,%3Csvg xmlns='https://lh3.googleusercontent.com/d/18LiZeLwBVmhUjaPDDXcjB-sX6YTBEgKS' width='350' height='350'%3E%3Crect width='350' height='350' fill='%23006600'/%3E%3Ctext x='175' y='175' text-anchor='middle' fill='%2300ff00' font-size='20'%3E雲寶 - 健康狀態%3C/text%3E%3C/svg%3E" 
+                         alt="雲寶 - 健康狀態">
+                </div>
+            </div>
+            
+            <!-- 任務區域 -->
+            <div class="mission-section">
+                <!-- 發現生物 -->
+                <div class="info-box">
+                    <h2>🔍 發現生物</h2>
+                    <div class="code-display">{ "name": "雲寶" }</div>
+                    <p>你找到雲寶了，但是他的狀態不好，<strong style="color: #ff4444;">hp要歸零了！</strong></p>
+                    <p style="margin-top: 15px; color: #87ceeb;">
+                        請幫助他，讓他的hp回到正常範圍，你必須透過<strong style="color: #00ffff;">「資料魔法（JSON）」</strong>為他注入生命。
+                    </p>
+                </div>
+                
+                <!-- 魔法挑戰 -->
+                <div class="challenge-box">
+                    <h3>⚡ 魔法挑戰</h3>
+                    <p style="color: #87ceeb; margin-bottom: 20px;">請寫一段 JSON，為這個生物賦予 hp，使它能甦醒</p>
+                    
+                    <textarea id="jsonInput" class="json-input" 
+                              placeholder="輸入你的 JSON 魔法..."></textarea>
+                    
+                    <button class="magic-button" onclick="castMagic()">
+                        🔮 施展魔法
+                    </button>
+                </div>
+                
+                <!-- 結果顯示 -->
+                <div id="resultBox" class="result-box">
+                    <div id="resultContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let attempts = 0;
+        const hints = [
+            "💡 提示 1: JSON 需要包含 hp 屬性",
+            "💡 提示 2: hp 的值必須大於 0",
+            "💡 提示 3: 格式應該是 { \"hp\": 數字 } 或 { \"hp\": \"數字\" }",
+            "💡 最後提示: 記住 JSON 的基本格式，屬性名稱要用雙引號包起來"
+        ];
+        
+        function castMagic() {
+            const input = document.getElementById('jsonInput').value.trim();
+            
+            if (!input) {
+                showResult('❌ 請輸入你的 JSON 魔法！', 'error');
+                return;
+            }
+            
+            try {
+                const jsonData = JSON.parse(input);
+                
+                if (!jsonData.hasOwnProperty('hp')) {
+                    attempts++;
+                    showResult('❌ 魔法失敗！雲寶需要 hp 才能甦醒。', 'error', true);
+                    return;
+                }
+                
+                const hp = jsonData.hp;
+                const hpValue = typeof hp === 'string' ? parseFloat(hp) : hp;
+                
+                if (isNaN(hpValue) || hpValue <= 0) {
+                    attempts++;
+                    showResult('❌ 魔法失敗！hp 必須是大於 0 的數字。', 'error', true);
+                    return;
+                }
+                
+                showSuccess(hpValue);
+                
+            } catch (error) {
+                attempts++;
+                showResult('❌ 魔法失敗！JSON 格式不正確。', 'error', true);
+            }
+        }
+        
+        function showResult(message, type, showHint = false) {
+            const resultBox = document.getElementById('resultBox');
+            const resultContent = document.getElementById('resultContent');
+            
+            let content = `<div class="${type}">${message}</div>`;
+            
+            if (showHint && attempts <= hints.length) {
+                content += `<div class="hint">${hints[attempts - 1]}</div>`;
+            }
+            
+            resultContent.innerHTML = content;
+            resultBox.classList.add('show');
+        }
+        
+        function showSuccess(hp) {
+            const resultContent = document.getElementById('resultContent');
+            resultContent.innerHTML = `
+                <div class="success">
+                    ✨ 魔法成功！雲寶的 HP 恢復到 ${hp}！<br><br>
+                    🎉 雲寶甦醒了！他感謝你的幫助！
+                </div>
+            `;
+            document.getElementById('resultBox').classList.add('show');
+            
+            setTimeout(() => {
+                transformImage();
+            }, 1000);
+        }
+        
+        function transformImage() {
+            const img1 = document.getElementById('creatureImage1');
+            const img2 = document.getElementById('creatureImage2');
+            
+            img1.style.opacity = '0';
+            
+            setTimeout(() => {
+                img2.style.opacity = '1';
+            }, 500);
+        }
+        
+        // Enter 鍵快捷鍵
+        document.getElementById('jsonInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                castMagic();
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'975c525de3096a96',t:'MTc1NjMwNTYwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
