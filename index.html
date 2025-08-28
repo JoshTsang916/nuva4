@@ -255,14 +255,14 @@
                     <div class="code-display">{ "name": "雲寶" }</div>
                     <p>你找到雲寶了，但是他的狀態不好，<strong style="color: #ff4444;">hp要歸零了！</strong></p>
                     <p style="margin-top: 15px; color: #87ceeb;">
-                        請幫助他，讓他的hp回到正常範圍，你必須透過<strong style="color: #00ffff;">「資料魔法（JSON）」</strong>為他注入生命。
+                        請幫助他，讓他回到滿血狀態，你必須透過<strong style="color: #00ffff;">「資料魔法（JSON）」</strong>為他注入生命。
                     </p>
                 </div>
                 
                 <!-- 魔法挑戰 -->
                 <div class="challenge-box">
                     <h3>⚡ 魔法挑戰</h3>
-                    <p style="color: #87ceeb; margin-bottom: 20px;">請寫一段 JSON，為這個生物賦予 hp，使它能甦醒</p>
+                    <p style="color: #87ceeb; margin-bottom: 20px;">請寫一段 JSON，幫雲寶把 hp 補滿，使它能甦醒</p>
                     
                     <textarea id="jsonInput" class="json-input" 
                               placeholder="輸入你的 JSON 魔法..."></textarea>
@@ -284,9 +284,9 @@
         let attempts = 0;
         const hints = [
             "💡 提示 1: JSON 需要包含 hp 屬性",
-            "💡 提示 2: hp 的值必須大於 0",
-            "💡 提示 3: 格式應該是 { \"hp\": 數字 } 或 { \"hp\": \"數字\" }",
-            "💡 最後提示: 記住 JSON 的基本格式，屬性名稱要用雙引號包起來"
+            "💡 提示 2: hp 必須補滿",
+            "💡 提示 3: 記住 JSON 的基本格式，屬性名稱要用雙引號包起來",
+            "💡 最後提示: 格式應該是 { \"hp\": 數字 } 或 { \"hp\": \"數字\" }"
         ];
         
         function castMagic() {
@@ -309,9 +309,9 @@
                 const hp = jsonData.hp;
                 const hpValue = typeof hp === 'string' ? parseFloat(hp) : hp;
                 
-                if (isNaN(hpValue) || hpValue <= 0) {
+                if (isNaN(hpValue) || hpValue < 100) {
                     attempts++;
-                    showResult('❌ 魔法失敗！hp 必須是大於 0 的數字。', 'error', true);
+                    showResult('❌ 魔法失敗！hp 必須補滿。', 'error', true);
                     return;
                 }
                 
@@ -341,7 +341,7 @@
             const resultContent = document.getElementById('resultContent');
             resultContent.innerHTML = `
                 <div class="success">
-                    ✨ 魔法成功！雲寶的 HP 恢復到 ${hp}！<br><br>
+                    ✨ 魔法成功！雲寶的 HP 補滿了！<br><br>
                     🎉 雲寶甦醒了！他感謝你的幫助！
                 </div>
             `;
