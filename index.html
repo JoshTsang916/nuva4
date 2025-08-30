@@ -293,12 +293,7 @@
         function normalizeQuotes(str) {
             return str
                 // 智能雙引號轉換為標準雙引號
-                .replace(/[""]/g, '"')
-                // 智能單引號轉換為標準單引號（如果有人用單引號）
-                .replace(/['']/g, "'")
-                // 全形引號轉換
-                .replace(/[「」]/g, '"')
-                .replace(/[『』]/g, "'");
+                .replace(/[“]/g, '"')
         }
         
         function castMagic() {
