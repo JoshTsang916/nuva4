@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>雲寶救援任務 - JSON魔法</title>
+    <title>雲寶救援任務</title>
     <style>
         * {
             margin: 0;
@@ -293,7 +293,7 @@
         function normalizeQuotes(str) {
             return str
                 // 智能雙引號轉換為標準雙引號
-                .replace(/[“”]/g, '"')
+                .replace(/[“”＂＂]/g, '"')
         }
         
         function castMagic() {
@@ -305,7 +305,7 @@
             }
             
             // 檢查是否使用了非標準引號
-            const hasSmartQuotes = /[“”]/.test(input);
+            const hasSmartQuotes = /[“”＂＂]/.test(input);
             
             // 處理各種引號問題
             const normalizedInput = normalizeQuotes(input);
@@ -368,10 +368,6 @@
             
             if (hasSmartQuotes) {
                 message += `
-                    <div class="hint" style="color: #ffaa00; margin-top: 15px;">
-                        💡 小提醒：雖然這次讓你通過了，但你使用的是全形引號或智能引號。<br>
-                        標準的 JSON 格式應該使用半形雙引號 " " 哦！
-                    </div>
                 `;
             }
             
