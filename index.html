@@ -293,7 +293,7 @@
         function normalizeQuotes(str) {
             return str
                 // 智能雙引號轉換為標準雙引號
-                .replace(/[“]/g, '"')
+                .replace(/[“”]/g, '"')
         }
         
         function castMagic() {
@@ -305,7 +305,7 @@
             }
             
             // 檢查是否使用了非標準引號
-            const hasSmartQuotes = /[""''「」『』]/.test(input);
+            const hasSmartQuotes = /[“”]/.test(input);
             
             // 處理各種引號問題
             const normalizedInput = normalizeQuotes(input);
