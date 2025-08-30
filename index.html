@@ -289,16 +289,34 @@
             "💡 最後提示: 格式應該是 { \"hp\": 數字 } 或 { \"hp\": \"數字\" }"
         ];
         
+        // 統一處理各種引號問題
+        function normalizeQuotes(str) {
+            return str
+                // 智能雙引號轉換為標準雙引號
+                .replace(/[""]/g, '"')
+                // 智能單引號轉換為標準單引號（如果有人用單引號）
+                .replace(/['']/g, "'")
+                // 全形引號轉換
+                .replace(/[「」]/g, '"')
+                .replace(/[『』]/g, "'");
+        }
+        
         function castMagic() {
-            const input = document.getElementById('jsonInput').value.trim();
+            let input = document.getElementById('jsonInput').value.trim();
             
             if (!input) {
                 showResult('❌ 請輸入你的 JSON 魔法！', 'error');
                 return;
             }
             
+            // 檢查是否使用了非標準引號
+            const hasSmartQuotes = /[""''「」『』]/.test(input);
+            
+            // 處理各種引號問題
+            const normalizedInput = normalizeQuotes(input);
+            
             try {
-                const jsonData = JSON.parse(input);
+                const jsonData = JSON.parse(normalizedInput);
                 
                 if (!jsonData.hasOwnProperty('hp')) {
                     attempts++;
@@ -315,7 +333,7 @@
                     return;
                 }
                 
-                showSuccess(hpValue);
+                showSuccess(hpValue, hasSmartQuotes);
                 
             } catch (error) {
                 attempts++;
@@ -329,22 +347,40 @@
             
             let content = `<div class="${type}">${message}</div>`;
             
-            if (showHint && attempts <= hints.length) {
-                content += `<div class="hint">${hints[attempts - 1]}</div>`;
+            if (showHint) {
+                if (attempts > 7) {
+                    content += `<div class="hint" style="color: #9966ff;">
+                        ✨ 有某種神秘的力量希望你成功...一雙無形的手直接寫下了答案...<br><br>
+                        <strong style="color: #00ffff;">{ "hp": 100 }</strong>
+                    </div>`;
+                } else if (attempts <= hints.length) {
+                    content += `<div class="hint">${hints[attempts - 1]}</div>`;
+                }
             }
             
             resultContent.innerHTML = content;
             resultBox.classList.add('show');
         }
         
-        function showSuccess(hp) {
+        function showSuccess(hp, hasSmartQuotes = false) {
             const resultContent = document.getElementById('resultContent');
-            resultContent.innerHTML = `
+            let message = `
                 <div class="success">
                     ✨ 魔法成功！雲寶的 HP 補滿了！<br><br>
                     🎉 雲寶甦醒了！他感謝你的幫助！
                 </div>
             `;
+            
+            if (hasSmartQuotes) {
+                message += `
+                    <div class="hint" style="color: #ffaa00; margin-top: 15px;">
+                        💡 小提醒：雖然這次讓你通過了，但你使用的是全形引號或智能引號。<br>
+                        標準的 JSON 格式應該使用半形雙引號 " " 哦！
+                    </div>
+                `;
+            }
+            
+            resultContent.innerHTML = message;
             document.getElementById('resultBox').classList.add('show');
             
             setTimeout(() => {
